@@ -8,6 +8,8 @@
   "target_std": 81.21369455759162,
   "target_min": 28.333333333333332,
   "target_max": 608.3333333333334,
-  "adf_statistic": -8.760991663779743,
-  "adf_pvalue": 2.674520524468746e-14
+  "adf_statistic": -9.016389491844526,
+  "adf_pvalue": 5.934864745699956e-15,
+  "holdout_period_hours": 336,
+  "forecast_horizon_hours": 24
 }

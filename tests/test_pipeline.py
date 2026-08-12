@@ -16,7 +16,7 @@ def test_lag_uses_past_value():
 
 def test_output_forecast_length():
     f=pd.read_csv('outputs/forecasts/all_forecasts.csv')
-    assert len(f)==14*24
+    assert len(f)==24
 
 def test_no_missing_actuals():
     f=pd.read_csv('outputs/forecasts/all_forecasts.csv')

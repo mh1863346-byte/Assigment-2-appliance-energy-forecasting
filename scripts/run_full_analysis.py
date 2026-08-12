@@ -29,7 +29,8 @@ for p in [FIG, MET, FC, PROC]:
     p.mkdir(parents=True, exist_ok=True)
 
 TARGET = "Appliances"
-H = 14 * 24
+TEST_H = 14 * 24
+FORECAST_H = 24
 np.random.seed(42)
 
 
@@ -279,8 +280,15 @@ def main():
 
     y = df[TARGET]
 
-    train = y.iloc[:-H]
-    test = y.iloc[-H:]
+    # Reserve the final 14 days as the out-of-sample holdout.
+    holdout_train = y.iloc[:-TEST_H]
+    holdout_test = y.iloc[-TEST_H:]
+
+    # The assignment forecast horizon is 24 hours.
+    # The final 24 hours of the holdout are forecast from a genuine forecast
+    # origin immediately before those 24 observations.
+    train = y.iloc[:-FORECAST_H]
+    test = y.iloc[-FORECAST_H:]
     idx = test.index
 
     # EDA
@@ -303,6 +311,8 @@ def main():
         "target_max": float(y.max()),
         "adf_statistic": float(adf[0]),
         "adf_pvalue": float(adf[1]),
+        "holdout_period_hours": int(TEST_H),
+        "forecast_horizon_hours": int(FORECAST_H),
     }
 
     (OUT / "analysis_summary.json").write_text(
@@ -369,7 +379,7 @@ def main():
     forecasts["drift"] = pd.Series(
         [
             train.iloc[-1] + slope * (i + 1)
-            for i in range(H)
+            for i in range(FORECAST_H)
         ],
         index=idx,
     )
@@ -400,8 +410,8 @@ def main():
     ).fit(disp=False, maxiter=100)
 
     sfc = fit.get_forecast(
-        H,
-        exog=df[exog_cols].iloc[-H:],
+        FORECAST_H,
+        exog=df[exog_cols].iloc[-FORECAST_H:],
     )
 
     forecasts["sarimax_conditional"] = pd.Series(
@@ -452,7 +462,7 @@ def main():
         ("xgboost_conditional", True),
     ]:
         tab = make_features(
-            df.iloc[:-H],
+            df.iloc[:-FORECAST_H],
             include_exog=inc,
         )
 
@@ -505,7 +515,7 @@ def main():
     # Genuine Chronos foundation model
     forecasts["chronos_t5_small"] = chronos_forecast(
         y_train=train,
-        horizon=H,
+        horizon=FORECAST_H,
         forecast_index=idx,
     )
 
@@ -530,6 +540,10 @@ def main():
         MET / "model_comparison.csv",
         index=False,
     )
+    mdf.to_csv(
+        MET / "model_comparison_24h.csv",
+        index=False,
+    )
 
     fdf = pd.DataFrame(
         {
@@ -541,6 +555,9 @@ def main():
     fdf.to_csv(
         FC / "all_forecasts.csv"
     )
+    fdf.to_csv(
+        FC / "final_24h_forecasts.csv"
+    )
 
     comparison_models = [
         "daily_seasonal_naive",
@@ -551,7 +568,7 @@ def main():
         "chronos_t5_small",
     ]
 
-    # Full test-period comparison
+    # Genuine 24-hour forecast comparison
     plt.figure(figsize=(14, 7))
 
     train.tail(168).plot(label="training")
@@ -568,7 +585,7 @@ def main():
         )
 
     plt.title(
-        "Forecast comparison over final 14 days"
+        "Genuine 24-hour forecast comparison"
     )
 
     plt.ylabel(
