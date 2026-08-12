@@ -1,0 +1,13 @@
+{
+  "rows_original_10min": 19735,
+  "rows_hourly": 3290,
+  "start": "2016-01-11 17:00:00",
+  "end": "2016-05-27 18:00:00",
+  "missing_after_processing": 0,
+  "target_mean": 97.7791286727457,
+  "target_std": 81.21369455759162,
+  "target_min": 28.333333333333332,
+  "target_max": 608.3333333333334,
+  "adf_statistic": -8.76099166377974,
+  "adf_pvalue": 2.6745205244687754e-14
+}
