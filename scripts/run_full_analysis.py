@@ -14,7 +14,17 @@ from xgboost import XGBRegressor
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf
+import random
+import torch
 
+RANDOM_SEED = 42
+
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+torch.manual_seed(RANDOM_SEED)
+
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(RANDOM_SEED)
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "energydata_complete.csv"
