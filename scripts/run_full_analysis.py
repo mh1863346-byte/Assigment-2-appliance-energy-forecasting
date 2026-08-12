@@ -392,15 +392,12 @@ def main():
     fit = SARIMAX(
         sar_train,
         exog=sar_exog,
-        order=(1, 0, 1),
+        order=(4, 1, 1),
         seasonal_order=(1, 0, 1, 24),
-        trend="c",
+        trend='c',
         enforce_stationarity=False,
-        enforce_invertibility=False,
-    ).fit(
-        disp=False,
-        maxiter=50,
-    )
+        enforce_invertibility=False
+    ).fit(disp=False, maxiter=100)
 
     sfc = fit.get_forecast(
         H,
@@ -428,7 +425,6 @@ def main():
     )
 
     resid = fit.resid.dropna()
-
     fig, ax = plt.subplots(figsize=(8, 4))
     plot_acf(resid, lags=72, ax=ax)
     ax.set_title("SARIMAX residual ACF")
